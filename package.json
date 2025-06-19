@@ -1,0 +1,15 @@
+{
+  "name": "phone-input",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "weweb build",
+    "serve": "weweb serve"
+  },
+  "dependencies": {
+    "libphonenumber-js": "^1.12.9",
+    "maz-ui": "^3.50.1"
+  },
+  "devDependencies": {
+    "@weweb/cli": "latest"
+  }
+}
