@@ -1,0 +1,6 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+When you have some commands to execute, do them in several execution don't use &&.

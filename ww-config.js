@@ -6,9 +6,38 @@ export default {
     icon: 'phone',
   },
   properties: {
+    initialValue: {
+      label: {
+        en: 'Initial value',
+        fr: 'Valeur initiale'
+      },
+      type: 'object',
+      section: 'settings',
+      bindable: true,
+      defaultValue: {
+        phoneNumber: '',
+        countryCode: 'US'
+      },
+      /* wwEditor:start */
+      bindingValidation: {
+        type: 'object',
+        properties: {
+          phoneNumber: { 
+            type: 'string',
+            description: 'The initial phone number'
+          },
+          countryCode: { 
+            type: 'string',
+            description: 'The initial country code (e.g. "US", "FR", "GB")'
+          }
+        },
+        tooltip: 'An object containing phoneNumber and countryCode'
+      }
+      /* wwEditor:end */
+    },
     labelColor: {
       label: {
-        en: 'Label color',
+        en: 'Label color'
       },
       type: 'Color',
       classes: true,
@@ -21,13 +50,32 @@ export default {
       bindingValidation: {
         cssSupports: 'color',
         type: 'string',
-        tooltip: 'A string that represents a color code for the input labels',
+        tooltip: 'A string that represents a color code for the input labels'
+      }
+      /* wwEditor:end */
+    },
+    borderColor: {
+      label: {
+        en: 'Border color'
       },
+      type: 'Color',
+      classes: true,
+      bindable: true,
+      responsive: true,
+      states: true,
+      defaultValue: 'rgba(0, 0, 0, 0.2)',
+      section: 'settings',
+      /* wwEditor:start */
+      bindingValidation: {
+        cssSupports: 'border-color',
+        type: 'string',
+        tooltip: 'A string that represents a color code for the input borders'
+      }
       /* wwEditor:end */
     },
     backgroundColor: {
       label: {
-        en: 'Background color',
+        en: 'Background color'
       },
       type: 'Color',
       classes: true,
@@ -40,9 +88,8 @@ export default {
       bindingValidation: {
         cssSupports: 'background-color',
         type: 'string',
-        tooltip:
-          'A string that represents a color code: `"#ffffff" | "#000000" | "rgb(255, 255, 255)"`',
-      },
+        tooltip: 'A string that represents a color code: `"#ffffff" | "#000000" | "rgb(255, 255, 255)"`'
+      }
       /* wwEditor:end */
     },
     textColor: {
@@ -186,6 +233,15 @@ export default {
         tooltip: 'Layout orientation of the component',
       },
       /* wwEditor:end */
+    },
+    readOnly: {
+      label: {
+        en: "Read Only",
+        fr: "Lecture seule"
+      },
+      type: "OnOff",
+      section: "settings",
+      defaultValue: false,
     },
   },
   variables: {

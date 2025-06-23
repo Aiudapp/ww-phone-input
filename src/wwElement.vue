@@ -8,14 +8,26 @@
       'is-loading': isLoading,
     }"
   >
+  
+    <!-- Read Only View -->
+    <div v-if="content.readOnly" class="phone-readonly-display">
+      <div class="phone-flag">
+        <country-flag :country="countryData.code" size="small" />
+      </div>
+      <span class="phone-number-text">
+        {{ formattedPhoneNumber }}
+      </span>
+    </div>
+
+    <!-- Regular Phone Input -->
     <MazPhoneNumberInput
+      v-else
       v-model="localPhoneData.phoneNumber"
       v-model:country-code="localPhoneData.countryCode"
       :show-code-on-list="content?.showCodeOnList ?? true"
       :preferred-countries="content?.preferredCountries ?? ['US', 'GB', 'CA', 'FR', 'DE']"
       :country-locale="content?.language === 'fr' ? 'fr-FR' : 'en-US'"
       :auto-format="content?.autoFormat ?? true"
-      :orientation="content?.orientation ?? 'responsive'"
       :style="{
         '--maz-color-bg': content?.backgroundColor || '#ffffff',
         '--maz-color-bg-dark': content?.backgroundColor || '#ffffff',
@@ -28,6 +40,9 @@
         '--maz-dropdown-color': content?.textColor || '#333333',
         '--maz-dropdown-item-color': content?.textColor || '#333333',
         '--maz-dropdown-item-color-hover': content?.textColor || '#333333',
+        '--maz-input-height': '36px',
+        '--maz-border-color': content?.borderColor || 'rgba(0, 0, 0, 0.2)',
+        '--maz-border-color-hover': content?.borderColor || 'rgba(0, 0, 0, 0.2)',
       }"
       :disabled="isLoading"
       :error="showError"
@@ -45,8 +60,11 @@
 </template>
 
 <script>
+
 import MazPhoneNumberInput from 'maz-ui/components/MazPhoneNumberInput.mjs'
 import 'maz-ui/styles'
+import { computed, ref } from 'vue'
+import CountryFlag from 'vue-country-flag-next'
 
 const translations = {
   en: {
@@ -77,17 +95,49 @@ export default {
   name: 'PhoneInput',
   components: {
     MazPhoneNumberInput,
+    CountryFlag
   },
   props: {
     content: { type: Object, required: true },
     uid: { type: String, required: true },
+    wwElementState: { type: Object, required: true },
   },
   emits: ['update:content', 'trigger-event'],
+  setup(props) {
+    const { value: phoneData, setValue: setPhoneData } = wwLib.wwVariable.useComponentVariable({
+      uid: props.wwElementState.uid,
+      name: 'phoneData',
+      type: 'object',
+      defaultValue: computed(() => ({
+        phoneNumber: (props.content && props.content.initialValue && props.content.initialValue.phoneNumber) || '',
+        countryCode: (props.content && props.content.initialValue && props.content.initialValue.countryCode) || 'US',
+        isValid: false,
+        isPossible: false,
+        countryCallingCode: '',
+        nationalNumber: '',
+        formatInternational: '',
+        formatNational: '',
+        type: '',
+        e164: '',
+        regionCode: '',
+        number: {
+          input: '',
+          international: '',
+          national: '',
+          e164: '',
+          rfc3966: '',
+          significant: '',
+        },
+      })),
+    })
+
+    return { phoneData, setPhoneData }
+  },
   data() {
     return {
       localPhoneData: {
-        phoneNumber: '',
-        countryCode: 'US',
+        phoneNumber: (this.content && this.content.initialValue && this.content.initialValue.phoneNumber) || '',
+        countryCode: (this.content && this.content.initialValue && this.content.initialValue.countryCode) || 'US',
         isValid: false,
         isPossible: false,
         countryCallingCode: '',
@@ -129,6 +179,18 @@ export default {
         ? 'Numéro de téléphone invalide'
         : 'Invalid phone number format'
     },
+    countryData() {
+      return {
+        dialCode: this.getDialCode(this.localPhoneData.countryCode),
+        code: this.localPhoneData.countryCode.toLowerCase()
+      };
+    },
+    formattedPhoneNumber() {
+      if (!this.localPhoneData.phoneNumber) {
+        return '';
+      }
+      return `+${this.countryData.dialCode} ${this.localPhoneData.phoneNumber}`;
+    }
   },
   watch: {
     'content.language': {
@@ -137,15 +199,41 @@ export default {
       },
       immediate: true,
     },
+    'content.initialValue': {
+      handler(newValue) {
+        if (!newValue || typeof newValue !== 'object') return
+        
+        const currentPhone = this.localPhoneData.phoneNumber || ''
+        const currentCountry = this.localPhoneData.countryCode || 'US'
+        
+        const shouldUpdatePhone = newValue.phoneNumber !== currentPhone
+        const shouldUpdateCountry = newValue.countryCode !== currentCountry
+        
+        if (shouldUpdatePhone || shouldUpdateCountry) {
+          this.localPhoneData = {
+            ...this.localPhoneData,
+            phoneNumber: newValue.phoneNumber || '',
+            countryCode: newValue.countryCode || 'US'
+          }
+          this.setPhoneData(this.localPhoneData)
+        }
+      },
+      deep: true,
+      immediate: true
+    },
+    phoneData: {
+      handler(newValue) {
+        if (newValue === this.localPhoneData) return
+        this.localPhoneData = { ...newValue }
+        this.$emit('trigger-event', { name: 'change', event: newValue })
+      },
+      deep: true,
+    },
   },
   methods: {
     async handleUpdate(data) {
       this.localPhoneData = { ...this.localPhoneData, ...data }
-      try {
-        await wwLib?.wwVariable?.updateValue?.(`${this.uid}-phoneData`, this.localPhoneData)
-      } catch (err) {
-        console.error('Failed to update variable:', err)
-      }
+      this.setPhoneData(this.localPhoneData)
     },
     handleData(results) {
       console.log('📊 Handle Data Called:', results)
@@ -153,29 +241,21 @@ export default {
     },
     handleCountryCode(countryCode) {
       this.localPhoneData.countryCode = countryCode
+      this.setPhoneData(this.localPhoneData)
+      this.$emit('trigger-event', { name: 'country-change', event: { countryCode } })
     },
-  },
-  async mounted() {
-    try {
-      if (window.wwLib?.wwVariable?.register) {
-        await window.wwLib.wwVariable.register({
-          name: `${this.uid}-phoneData`,
-          value: this.localPhoneData,
-          type: 'object',
-          defaultValue: this.localPhoneData,
-        })
-      }
-    } catch (err) {
-      console.error('Failed to register variable:', err)
-    }
-  },
-  beforeUnmount() {
-    try {
-      if (window.wwLib?.wwVariable?.unregister) {
-        window.wwLib.wwVariable.unregister(`${this.uid}-phoneData`)
-      }
-    } catch (err) {
-      console.error('Failed to unregister variable:', err)
+    getDialCode(code) {
+      const dialCodes = {
+        'US': '1',
+        'GB': '44',
+        'FR': '33',
+        // Add more as needed
+        'DE': '49',
+        'IT': '39',
+        'ES': '34',
+        'CA': '1',
+      };
+      return dialCodes[code] || '';
     }
   },
 }
@@ -185,7 +265,7 @@ export default {
 .phone-input-container {
   position: relative;
   width: 100%;
-  transition: all 0.3s ease;
+  transition: none;
 }
 
 /* Override Maz UI default styles */
@@ -195,33 +275,7 @@ export default {
   --maz-color-bg-dark: var(--maz-color-bg) !important;
   --maz-color-bg-light: var(--maz-color-bg) !important;
   --maz-color-bg-lighter: var(--maz-color-bg) !important;
-}
-
-.phone-input-container :deep(.maz-input input),
-.phone-input-container :deep(.maz-input button) {
-  background-color: var(--maz-color-bg) !important;
-}
-
-.phone-input-container :deep(.maz-select__options) {
-  background-color: var(--maz-color-bg) !important;
-}
-
-/* Dark mode specific styles */
-.phone-input-container.dark {
-  color: var(--maz-color-text);
-}
-
-.phone-input-container.dark :deep(.maz-input),
-.phone-input-container.dark :deep(.maz-input input),
-.phone-input-container.dark :deep(.maz-input button),
-.phone-input-container.dark :deep(.maz-select__options) {
-  --maz-color: var(--maz-color-text);
-  --maz-border-color: rgba(255, 255, 255, 0.2);
-  background-color: var(--maz-color-bg) !important;
-}
-
-.phone-input-container :deep(.maz-input) {
-  --maz-border-color: rgba(0, 0, 0, 0.2);
+  border-color: v-bind('content?.borderColor || "rgba(0, 0, 0, 0.2)"') !important;
 }
 
 /* Error state */
@@ -242,7 +296,6 @@ export default {
 
 /* Loading state */
 .phone-input-container.is-loading {
-  opacity: 0.7;
   pointer-events: none;
 }
 
@@ -250,14 +303,23 @@ export default {
   color: v-bind('content?.labelColor || "#333333"');
 }
 
-.phone-input-container :deep(.maz-select),
-.phone-input-container :deep(.maz-select__options),
-.phone-input-container :deep(.maz-select-item),
-.phone-input-container :deep(.maz-select__input) {
-  color: v-bind('content?.textColor || "#333333"');
+.phone-readonly-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 4px;
+  background-color: var(--ww-color-light-100);
+  
+  .phone-flag {
+    display: flex;
+    align-items: center;
+  }
+  
+  .phone-number-text {
+    color: v-bind('content?.textColor || "#333333"');
+    font-size: 1em;
+  }
 }
 
-.phone-input-container :deep(.maz-select__options) {
-  background-color: v-bind('content?.backgroundColor || "#ffffff"');
-}
 </style>
