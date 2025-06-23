@@ -246,7 +246,8 @@ export default {
   },
   variables: {
     phoneData: {
-      type: 'Object',
+      type: 'object',
+      name: 'phoneData',
       defaultValue: {
         phoneNumber: '',
         countryCode: 'US',
