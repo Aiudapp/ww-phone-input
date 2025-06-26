@@ -16,7 +16,7 @@ export default {
       bindable: true,
       defaultValue: {
         phoneNumber: '',
-        countryCode: 'US'
+        countryCode: 'FR'
       },
       /* wwEditor:start */
       bindingValidation: {
@@ -179,7 +179,7 @@ export default {
       label: { en: 'Preferred countries' },
       type: 'Array',
       bindable: true,
-      defaultValue: ['US', 'GB', 'CA', 'FR', 'DE'],
+      defaultValue: ['FR', 'GB', 'CA','US' , 'DE'],
       section: 'settings',
       /* wwEditor:start */
       bindingValidation: {
@@ -192,7 +192,7 @@ export default {
       label: { en: 'Country locale' },
       type: 'Text',
       bindable: true,
-      defaultValue: 'en-US',
+      defaultValue: 'fr-FR',
       section: 'settings',
       /* wwEditor:start */
       bindingValidation: {
@@ -242,6 +242,46 @@ export default {
       type: "OnOff",
       section: "settings",
       defaultValue: false,
+    },
+    successColor: {
+      label: {
+        en: 'Success color',
+        fr: 'Couleur de succès'
+      },
+      type: 'Color',
+      classes: true,
+      bindable: true,
+      responsive: true,
+      states: true,
+      defaultValue: '#28a745',
+      section: 'settings',
+      /* wwEditor:start */
+      bindingValidation: {
+        cssSupports: 'color',
+        type: 'string',
+        tooltip: 'A string that represents a color code for success state'
+      }
+      /* wwEditor:end */
+    },
+    errorColor: {
+      label: {
+        en: 'Error color',
+        fr: 'Couleur d\'erreur'
+      },
+      type: 'Color',
+      classes: true,
+      bindable: true,
+      responsive: true,
+      states: true,
+      defaultValue: '#dc3545',
+      section: 'settings',
+      /* wwEditor:start */
+      bindingValidation: {
+        cssSupports: 'color',
+        type: 'string',
+        tooltip: 'A string that represents a color code for error state'
+      }
+      /* wwEditor:end */
     },
   },
   variables: {

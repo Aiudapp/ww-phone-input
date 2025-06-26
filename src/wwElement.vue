@@ -12,7 +12,7 @@
     <!-- Read Only View -->
     <div v-if="content.readOnly && localPhoneData.phoneNumber" class="phone-readonly-display">
       <div class="phone-flag">
-        <country-flag :country="countryData.code" size="small" />
+        <span v-html="getCountryFlag(countryData.code)" class="country-flag"></span>
       </div>
       <span class="phone-number-text">
         {{ formattedPhoneNumber }}
@@ -26,6 +26,7 @@
       v-else
       v-model="localPhoneData.phoneNumber"
       v-model:country-code="localPhoneData.countryCode"
+      size="sm"
       :show-code-on-list="content?.showCodeOnList ?? true"
       :preferred-countries="content?.preferredCountries ?? ['US', 'GB', 'CA', 'FR', 'DE']"
       :country-locale="content?.language === 'fr' ? 'fr-FR' : 'en-US'"
@@ -54,7 +55,14 @@
       @data="handleData"
       @country-code="handleCountryCode"
       class="work-sans-phone-input"
-    />
+    >
+      <template #selector-flag="{ countryCode }">
+        <span v-html="getCountryFlag(countryCode)" class="country-flag"></span>
+      </template>
+      <template #country-list-flag="{ countryCode }">
+        <span v-html="getCountryFlag(countryCode)" class="country-flag"></span>
+      </template>
+    </MazPhoneNumberInput>
     <div v-if="showError" class="error-message">
       {{ currentErrorMessage }}
     </div>
@@ -64,10 +72,12 @@
 <script>
 
 import MazPhoneNumberInput from 'maz-ui/components/MazPhoneNumberInput.mjs'
-import 'maz-ui/styles'
+import 'maz-ui/css/main.css'
+
+
 import { computed, ref, onMounted, onErrorCaptured, watch } from 'vue'
-import CountryFlag from 'vue-country-flag-next'
-var exports = {}
+import * as countryFlagIcons from 'country-flag-icons/string/3x2'
+
 const translations = {
   en: {
     countrySelector: {
@@ -98,7 +108,6 @@ export default {
   name: 'PhoneInput',
   components: {
     MazPhoneNumberInput,
-    CountryFlag
   },
   props: {
     content: { type: Object, required: true },
@@ -298,6 +307,14 @@ Object containing all phone input data:
         'CA': '1',
       };
       return dialCodes[code] || '';
+    },
+    getCountryFlag(countryCode) {
+      const code = countryCode.toUpperCase()
+      if (countryFlagIcons[code]) {
+        return countryFlagIcons[code]
+      }
+      console.warn(`No flag found for country code: ${code}`)
+      return ''
     }
   },
 }
@@ -317,23 +334,47 @@ Object containing all phone input data:
   --maz-color-bg-dark: var(--maz-color-bg) !important;
   --maz-color-bg-light: var(--maz-color-bg) !important;
   --maz-color-bg-lighter: var(--maz-color-bg) !important;
+  --maz-success: v-bind('content?.successColor || "#28a745"') !important;
+  --maz-error: v-bind('content?.errorColor || "#dc3545"') !important;
   border-color: v-bind('content?.borderColor || "rgba(0, 0, 0, 0.2)"') !important;
+}
+
+/* Fix dropdown caret visibility */
+.phone-input-container {
+  :deep(.maz-select) {
+    .maz-select__caret {
+      opacity: 1 !important;
+      color: v-bind('content?.textColor || "#333333"') !important;
+      margin-right: 4px;
+    }
+
+    .maz-select__input {
+      padding-right: 24px !important;
+    }
+  }
+
+  /* Ensure proper alignment of the select input */
+  :deep(.maz-select__input-wrapper) {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
 }
 
 /* Error state */
 .error-message {
-  color: var(--ww-color-error);
+  color: v-bind('content?.errorColor || "#dc3545"');
   margin-top: 0.5rem;
   font-size: 0.875rem;
 }
 
 /* Valid/Invalid states */
 .phone-input-container.is-valid :deep(.maz-input) {
-  --maz-success: var(--ww-color-success);
+  --maz-success: v-bind('content?.successColor || "#28a745"') !important;
 }
 
 .phone-input-container.is-invalid :deep(.maz-input) {
-  --maz-error: var(--ww-color-error);
+  --maz-error: v-bind('content?.errorColor || "#dc3545"') !important;
 }
 
 /* Loading state */
@@ -374,4 +415,52 @@ Object containing all phone input data:
   font-size: 1em;
 }
 
+.country-flag {
+  display: inline-flex;
+  width: 20px;
+  height: 15px;
+}
+
+.country-flag :deep(svg) {
+  width: 100%;
+  height: 100%;
+  border-radius: 2px;
+  display: block;
+}
+
+/* Improve flag display in the input */
+.phone-input-container :deep(.maz-select__flag) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 15px;
+  overflow: hidden;
+}
+
+/* Improve flag display in the dropdown */
+.phone-input-container :deep(.maz-select__options-list-item) {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+}
+
+.phone-input-container :deep(.maz-select__options-list-item .country-flag) {
+  flex-shrink: 0;
+}
+
+/* Improve flag display in readonly mode */
+.phone-readonly-display .phone-flag {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 15px;
+  overflow: hidden;
+}
+
+.phone-readonly-display .country-flag {
+  flex-shrink: 0;
+}
 </style>
