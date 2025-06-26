@@ -241,7 +241,14 @@ export default {
       },
       type: "OnOff",
       section: "settings",
+      bindable: true,
       defaultValue: false,
+      /* wwEditor:start */
+      bindingValidation: {
+        type: 'boolean',
+        tooltip: 'Toggle read-only mode for the phone input'
+      }
+      /* wwEditor:end */
     },
     successColor: {
       label: {

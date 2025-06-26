@@ -91,6 +91,7 @@
 
 <script>
 
+import { AsYouType, parsePhoneNumber } from 'libphonenumber-js'
 import MazPhoneNumberInput from 'maz-ui/components/MazPhoneNumberInput.mjs'
 import 'maz-ui/css/main.css'
 
@@ -259,6 +260,26 @@ Object containing all phone input data:
       if (!this.localPhoneData.phoneNumber) {
         return '';
       }
+      
+      try {
+        // Try to use the stored formatted version first
+        if (this.localPhoneData.formatInternational) {
+          return this.localPhoneData.formatInternational;
+        }
+        
+        // If no stored format, generate it
+        const phoneNumber = parsePhoneNumber(
+          this.localPhoneData.phoneNumber,
+          this.localPhoneData.countryCode
+        );
+        if (phoneNumber) {
+          return phoneNumber.formatInternational();
+        }
+      } catch (error) {
+        console.warn('Phone formatting error:', error);
+      }
+      
+      // Fallback to basic formatting
       return `+${this.countryData.dialCode} ${this.localPhoneData.phoneNumber}`;
     }
   },
@@ -304,10 +325,35 @@ Object containing all phone input data:
       }
     },
     handleData(results) {
-      console.log('📊 Handle Data Called:', results)
       // Only handle data if we have actual results
-      if (results && (results.phoneNumber || results.countryCode)) {
-        this.handleUpdate(results)
+      if (results) {
+        try {
+          // Parse the phone number to get proper formatting
+          const phoneNumber = parsePhoneNumber(results.phoneNumber || '', results.countryCode)
+          const formatter = new AsYouType(results.countryCode)
+          formatter.input(results.phoneNumber || '')
+          
+          this.localPhoneData = {
+            ...this.localPhoneData,
+            ...results,
+            formatInternational: phoneNumber ? phoneNumber.formatInternational() : '',
+            formatNational: formatter.getNumber()?.formatNational || formatter.getFormattedNumber(),
+            e164: phoneNumber ? phoneNumber.format('E.164') : '',
+            nationalNumber: results.nationalNumber || '',
+            countryCallingCode: results.countryCallingCode || '',
+            isPossible: results.isPossible || false,
+            isValid: results.isValid || false
+          }
+          this.setPhoneData(this.localPhoneData)
+        } catch (error) {
+          console.warn('Phone formatting error:', error)
+          // Fallback to basic formatting if parsing fails
+          this.localPhoneData = {
+            ...this.localPhoneData,
+            ...results
+          }
+          this.setPhoneData(this.localPhoneData)
+        }
       }
     },
     handleCountryCode(countryCode) {
