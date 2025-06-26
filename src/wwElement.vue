@@ -28,7 +28,7 @@
       v-model:country-code="localPhoneData.countryCode"
       size="sm"
       :show-code-on-list="content?.showCodeOnList ?? true"
-      :preferred-countries="content?.preferredCountries ?? ['US', 'GB', 'CA', 'FR', 'DE']"
+      :preferred-countries="content?.preferredCountries ?? ['FR', 'GB', 'CA','US' , 'DE']"
       :country-locale="content?.language === 'fr' ? 'fr-FR' : 'en-US'"
       :auto-format="content?.autoFormat ?? true"
       :style="{
@@ -46,6 +46,26 @@
         '--maz-input-height': '36px',
         '--maz-border-color': content?.borderColor || 'rgba(0, 0, 0, 0.2)',
         '--maz-border-color-hover': content?.borderColor || 'rgba(0, 0, 0, 0.2)',
+        '--maz-color-success': content?.successColor || '#28a745',
+        '--maz-color-danger': content?.errorColor || '#ff6e6b',
+        '--maz-color-success-50': `color-mix(in srgb, ${content?.successColor || '#28a745'} 10%, white)`,
+        '--maz-color-success-100': `color-mix(in srgb, ${content?.successColor || '#28a745'} 20%, white)`,
+        '--maz-color-success-200': `color-mix(in srgb, ${content?.successColor || '#28a745'} 40%, white)`,
+        '--maz-color-success-300': `color-mix(in srgb, ${content?.successColor || '#28a745'} 60%, white)`,
+  '--maz-color-success-400': `color-mix(in srgb, ${content?.successColor || '#28a745'} 80%, white)`,
+  '--maz-color-success-600': `color-mix(in srgb, ${content?.successColor || '#28a745'} 80%, black)`,
+  '--maz-color-success-700': `color-mix(in srgb, ${content?.successColor || '#28a745'} 60%, black)`,
+  '--maz-color-success-800': `color-mix(in srgb, ${content?.successColor || '#28a745'} 40%, black)`,
+  '--maz-color-success-900': `color-mix(in srgb, ${content?.successColor || '#28a745'} 20%, black)`,
+  '--maz-color-danger-50': `color-mix(in srgb, ${content?.errorColor || '#ff6e6b'} 10%, white)`,
+  '--maz-color-danger-100': `color-mix(in srgb, ${content?.errorColor || '#ff6e6b'} 20%, white)`,
+  '--maz-color-danger-200': `color-mix(in srgb, ${content?.errorColor || '#ff6e6b'} 40%, white)`,
+  '--maz-color-danger-300': `color-mix(in srgb, ${content?.errorColor || '#ff6e6b'} 60%, white)`,
+  '--maz-color-danger-400': `color-mix(in srgb, ${content?.errorColor || '#ff6e6b'} 80%, white)`,
+  '--maz-color-danger-600': `color-mix(in srgb, ${content?.errorColor || '#ff6e6b'} 80%, black)`,
+  '--maz-color-danger-700': `color-mix(in srgb, ${content?.errorColor || '#ff6e6b'} 60%, black)`,
+  '--maz-color-danger-800': `color-mix(in srgb, ${content?.errorColor || '#ff6e6b'} 40%, black)`,
+  '--maz-color-danger-900': `color-mix(in srgb, ${content?.errorColor || '#ff6e6b'} 20%, black)`,
       }"
       :disabled="isLoading"
       :error="showError"
@@ -334,8 +354,7 @@ Object containing all phone input data:
   --maz-color-bg-dark: var(--maz-color-bg) !important;
   --maz-color-bg-light: var(--maz-color-bg) !important;
   --maz-color-bg-lighter: var(--maz-color-bg) !important;
-  --maz-success: v-bind('content?.successColor || "#28a745"') !important;
-  --maz-error: v-bind('content?.errorColor || "#dc3545"') !important;
+
   border-color: v-bind('content?.borderColor || "rgba(0, 0, 0, 0.2)"') !important;
 }
 
@@ -368,14 +387,7 @@ Object containing all phone input data:
   font-size: 0.875rem;
 }
 
-/* Valid/Invalid states */
-.phone-input-container.is-valid :deep(.maz-input) {
-  --maz-success: v-bind('content?.successColor || "#28a745"') !important;
-}
 
-.phone-input-container.is-invalid :deep(.maz-input) {
-  --maz-error: v-bind('content?.errorColor || "#dc3545"') !important;
-}
 
 /* Loading state */
 .phone-input-container.is-loading {

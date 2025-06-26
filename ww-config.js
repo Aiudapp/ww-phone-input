@@ -259,7 +259,7 @@ export default {
       bindingValidation: {
         cssSupports: 'color',
         type: 'string',
-        tooltip: 'A string that represents a color code for success state'
+        tooltip: 'A string that represents a color code for success state. This will automatically generate lighter and darker shades.'
       }
       /* wwEditor:end */
     },
