@@ -1,25 +1,16 @@
 <template>
   <div
     class="phone-input-container"
-    :class="{
-      dark: content?.darkMode,
-      'is-valid': localPhoneData.isValid,
-      'is-invalid': !localPhoneData.isValid && localPhoneData.phoneNumber,
-      'is-loading': isLoading,
-    }"
+    :class="containerClasses"
   >
-  
     <!-- Read Only View -->
-    <div v-if="content.readOnly && localPhoneData.phoneNumber" class="phone-readonly-display">
+    <div v-if="isReadOnly" class="phone-readonly-display">
       <div class="phone-flag">
         <span v-html="getCountryFlag(countryData.code)" class="country-flag"></span>
       </div>
-      <span class="phone-number-text">
-        {{ formattedPhoneNumber }}
-      </span>
+      <span class="phone-number-text">{{ formattedPhoneNumber }}</span>
     </div>
-    <div v-else-if="content.readOnly" class="phone-readonly-empty">
-    </div>
+    <div v-else-if="content.readOnly" class="phone-readonly-empty"></div>
 
     <!-- Regular Phone Input -->
     <MazPhoneNumberInput
@@ -28,45 +19,10 @@
       v-model:country-code="localPhoneData.countryCode"
       size="sm"
       :show-code-on-list="content?.showCodeOnList ?? true"
-      :preferred-countries="content?.preferredCountries ?? ['FR', 'GB', 'CA','US' , 'DE']"
-      :country-locale="content?.language === 'fr' ? 'fr-FR' : 'en-US'"
+      :preferred-countries="content?.preferredCountries ?? ['FR', 'GB', 'CA', 'US', 'DE']"
+      :country-locale="countryLocale"
       :auto-format="content?.autoFormat ?? true"
-      :style="{
-        '--maz-color-bg': content?.backgroundColor || '#ffffff',
-        '--maz-color-bg-dark': content?.backgroundColor || '#ffffff',
-        '--maz-color-bg-light': content?.backgroundColor || '#ffffff',
-        '--maz-color-bg-lighter': content?.backgroundColor || '#ffffff',
-        '--maz-color-text': content?.textColor || '#333333',
-        '--maz-color-placeholder': content?.placeholderColor || '#999999',
-        '--maz-border-radius': '8px',
-        '--maz-select-color': content?.textColor || '#333333',
-        '--maz-dropdown-color': content?.textColor || '#333333',
-        '--maz-dropdown-item-color': content?.textColor || '#333333',
-        '--maz-dropdown-item-color-hover': content?.textColor || '#333333',
-        '--maz-input-height': '36px',
-        '--maz-border-color': content?.borderColor || 'rgba(0, 0, 0, 0.2)',
-        '--maz-border-color-hover': content?.borderColor || 'rgba(0, 0, 0, 0.2)',
-        '--maz-color-success': content?.successColor || '#28a745',
-        '--maz-color-danger': content?.errorColor || '#ff6e6b',
-        '--maz-color-success-50': `color-mix(in srgb, ${content?.successColor || '#28a745'} 10%, white)`,
-        '--maz-color-success-100': `color-mix(in srgb, ${content?.successColor || '#28a745'} 20%, white)`,
-        '--maz-color-success-200': `color-mix(in srgb, ${content?.successColor || '#28a745'} 40%, white)`,
-        '--maz-color-success-300': `color-mix(in srgb, ${content?.successColor || '#28a745'} 60%, white)`,
-  '--maz-color-success-400': `color-mix(in srgb, ${content?.successColor || '#28a745'} 80%, white)`,
-  '--maz-color-success-600': `color-mix(in srgb, ${content?.successColor || '#28a745'} 80%, black)`,
-  '--maz-color-success-700': `color-mix(in srgb, ${content?.successColor || '#28a745'} 60%, black)`,
-  '--maz-color-success-800': `color-mix(in srgb, ${content?.successColor || '#28a745'} 40%, black)`,
-  '--maz-color-success-900': `color-mix(in srgb, ${content?.successColor || '#28a745'} 20%, black)`,
-  '--maz-color-danger-50': `color-mix(in srgb, ${content?.errorColor || '#ff6e6b'} 10%, white)`,
-  '--maz-color-danger-100': `color-mix(in srgb, ${content?.errorColor || '#ff6e6b'} 20%, white)`,
-  '--maz-color-danger-200': `color-mix(in srgb, ${content?.errorColor || '#ff6e6b'} 40%, white)`,
-  '--maz-color-danger-300': `color-mix(in srgb, ${content?.errorColor || '#ff6e6b'} 60%, white)`,
-  '--maz-color-danger-400': `color-mix(in srgb, ${content?.errorColor || '#ff6e6b'} 80%, white)`,
-  '--maz-color-danger-600': `color-mix(in srgb, ${content?.errorColor || '#ff6e6b'} 80%, black)`,
-  '--maz-color-danger-700': `color-mix(in srgb, ${content?.errorColor || '#ff6e6b'} 60%, black)`,
-  '--maz-color-danger-800': `color-mix(in srgb, ${content?.errorColor || '#ff6e6b'} 40%, black)`,
-  '--maz-color-danger-900': `color-mix(in srgb, ${content?.errorColor || '#ff6e6b'} 20%, black)`,
-      }"
+      :style="mazInputStyles"
       :disabled="isLoading"
       :error="showError"
       :success="showSuccess"
@@ -90,15 +46,13 @@
 </template>
 
 <script>
-
+import { computed, ref, onMounted, onErrorCaptured, watch } from 'vue'
 import { AsYouType, parsePhoneNumber } from 'libphonenumber-js'
 import MazPhoneNumberInput from 'maz-ui/components/MazPhoneNumberInput.mjs'
 import 'maz-ui/css/main.css'
-
-
-import { computed, ref, onMounted, onErrorCaptured, watch } from 'vue'
 import * as countryFlagIcons from 'country-flag-icons/string/3x2'
 
+// Translations object moved outside component for better performance
 const translations = {
   en: {
     countrySelector: {
@@ -124,8 +78,30 @@ const translations = {
   },
 }
 
+// Default phone data structure
+const defaultPhoneData = {
+  phoneNumber: '',
+  countryCode: 'US',
+  isValid: false,
+  isPossible: false,
+  countryCallingCode: '',
+  nationalNumber: '',
+  formatInternational: '',
+  formatNational: '',
+  type: '',
+  e164: '',
+  regionCode: '',
+  number: {
+    input: '',
+    international: '',
+    national: '',
+    e164: '',
+    rfc3966: '',
+    significant: '',
+  },
+}
+
 export default {
-  
   name: 'PhoneInput',
   components: {
     MazPhoneNumberInput,
@@ -136,153 +112,173 @@ export default {
     wwElementState: { type: Object, required: true },
   },
   emits: ['update:content', 'trigger-event'],
+  
   setup(props) {
-    // Error handling for component setup
     onErrorCaptured((err, instance, info) => {
       console.error('Component error:', err)
       console.info('Error instance:', instance)
       console.info('Error info:', info)
-      return false // Prevent error from propagating
+      return false
     })
 
-    // Create a ref for the phone data with initial values
     const phoneDataRef = ref({
-      phoneNumber: '',
-      countryCode: 'US',
-      isValid: false,
-      isPossible: false,
-      countryCallingCode: '',
-      nationalNumber: '',
-      formatInternational: '',
-      formatNational: '',
-      type: '',
-      e164: '',
-      regionCode: '',
-      number: {
-        input: '',
-        international: '',
-        national: '',
-        e164: '',
-        rfc3966: '',
-        significant: '',
-      },
+      ...defaultPhoneData,
+      phoneNumber: props.content?.initialValue?.phoneNumber || '',
+      countryCode: props.content?.initialValue?.countryCode || 'US',
     })
 
-    // Register the component variable
-    const { setValue } = wwLib.wwVariable.useComponentVariable({
+    const { setValue, value } = wwLib.wwVariable.useComponentVariable({
       uid: props.wwElementState.uid,
       name: 'phoneData',
       defaultValue: phoneDataRef.value,
     })
 
-    // Create a computed property for the data
-    const data = computed(() => ({
-      ...phoneDataRef.value,
-    }))
+    const data = computed(() => phoneDataRef.value)
 
-    // Watch for changes and update the variable
-    watch(data, newData => setValue(newData), { deep: true, immediate: true })
+    watch(value, (newValue) => {
+      if (!newValue || typeof newValue !== 'object') return
+      const hasChanges = Object.keys(newValue).some(key => 
+        JSON.stringify(newValue[key]) !== JSON.stringify(phoneDataRef.value[key])
+      )
+      if (hasChanges) {
+        phoneDataRef.value = { ...newValue }
+      }
+    }, { deep: true })
 
-    // Register the local context
-    const markdown = `### Phone Input local informations
-
+    const markdown = `### Phone Input Component
+    
 #### phoneData
-Object containing all phone input data:
-- \`phoneNumber\`: Current phone number value
+Object containing phone input data:
+- \`phoneNumber\`: Current phone number
 - \`countryCode\`: Selected country code
-- \`isValid\`: Boolean indicating if phone number is valid
-- \`isPossible\`: Boolean indicating if phone number is possible
-- And other formatting information`
+- \`isValid\`: Validation status
+- \`isPossible\`: Possibility status
+- Additional formatting information`
 
     wwLib.wwElement.useRegisterElementLocalContext('phoneInput', data, {}, markdown)
 
     return {
       phoneData: phoneDataRef,
       setPhoneData: (newValue) => {
-        phoneDataRef.value = { ...phoneDataRef.value, ...newValue }
-        setValue(phoneDataRef.value)
+        if (!newValue || typeof newValue !== 'object') return
+        const hasChanges = Object.keys(newValue).some(key => 
+          JSON.stringify(newValue[key]) !== JSON.stringify(phoneDataRef.value[key])
+        )
+        if (hasChanges) {
+          phoneDataRef.value = { ...phoneDataRef.value, ...newValue }
+          setValue(phoneDataRef.value)
+        }
       }
     }
   },
+
   data() {
     return {
-      localPhoneData: {
-        phoneNumber: (this.content && this.content.initialValue && this.content.initialValue.phoneNumber) || '',
-        countryCode: (this.content && this.content.initialValue && this.content.initialValue.countryCode) || 'US',
-        isValid: false,
-        isPossible: false,
-        countryCallingCode: '',
-        nationalNumber: '',
-        formatInternational: '',
-        formatNational: '',
-        type: '',
-        e164: '',
-        regionCode: '',
-        number: {
-          input: '',
-          international: '',
-          national: '',
-          e164: '',
-          rfc3966: '',
-          significant: '',
-        },
-      },
+      localPhoneData: { ...defaultPhoneData },
       isLoading: false,
       showError: false,
       showSuccess: false,
     }
   },
+
   computed: {
-    wwObject: {
-      get() {
-        return this.content
-      },
-      set(content) {
-        this.$emit('update:content', content)
-      },
+    containerClasses() {
+      return {
+        dark: this.content?.darkMode,
+        'is-valid': this.localPhoneData.isValid,
+        'is-invalid': !this.localPhoneData.isValid && this.localPhoneData.phoneNumber,
+        'is-loading': this.isLoading,
+      }
     },
+    
+    isReadOnly() {
+      return this.content.readOnly && this.localPhoneData.phoneNumber
+    },
+
+    countryLocale() {
+      return this.content?.language === 'fr' ? 'fr-FR' : 'en-US'
+    },
+
     currentTranslations() {
-      const lang = this.content?.language || 'en'
-      return translations[lang]
+      return translations[this.content?.language || 'en']
     },
+
     currentErrorMessage() {
       return this.content?.language === 'fr'
         ? 'Numéro de téléphone invalide'
         : 'Invalid phone number format'
     },
+
     countryData() {
       return {
         dialCode: this.getDialCode(this.localPhoneData.countryCode),
         code: this.localPhoneData.countryCode.toLowerCase()
-      };
-    },
-    formattedPhoneNumber() {
-      if (!this.localPhoneData.phoneNumber) {
-        return '';
       }
+    },
+
+    mazInputStyles() {
+      const { content } = this
+      return {
+        '--maz-color-bg': content?.backgroundColor || '#ffffff',
+        '--maz-color-bg-dark': content?.backgroundColor || '#ffffff',
+        '--maz-color-bg-light': content?.backgroundColor || '#ffffff',
+        '--maz-color-bg-lighter': content?.backgroundColor || '#ffffff',
+        '--maz-color-text': content?.textColor || '#333333',
+        '--maz-color-placeholder': content?.placeholderColor || '#999999',
+        '--maz-border-radius': '8px',
+        '--maz-select-color': content?.textColor || '#333333',
+        '--maz-dropdown-color': content?.textColor || '#333333',
+        '--maz-dropdown-item-color': content?.textColor || '#333333',
+        '--maz-dropdown-item-color-hover': content?.textColor || '#333333',
+        '--maz-input-height': '36px',
+        '--maz-border-color': content?.borderColor || 'rgba(0, 0, 0, 0.2)',
+        '--maz-border-color-hover': content?.borderColor || 'rgba(0, 0, 0, 0.2)',
+        '--maz-color-success': content?.successColor || '#28a745',
+        '--maz-color-danger': content?.errorColor || '#ff6e6b',
+        '--maz-color-success-50': `color-mix(in srgb, ${content?.successColor || '#28a745'} 10%, white)`,
+        '--maz-color-success-100': `color-mix(in srgb, ${content?.successColor || '#28a745'} 20%, white)`,
+        '--maz-color-success-200': `color-mix(in srgb, ${content?.successColor || '#28a745'} 40%, white)`,
+        '--maz-color-success-300': `color-mix(in srgb, ${content?.successColor || '#28a745'} 60%, white)`,
+        '--maz-color-success-400': `color-mix(in srgb, ${content?.successColor || '#28a745'} 80%, white)`,
+        '--maz-color-success-600': `color-mix(in srgb, ${content?.successColor || '#28a745'} 80%, black)`,
+        '--maz-color-success-700': `color-mix(in srgb, ${content?.successColor || '#28a745'} 60%, black)`,
+        '--maz-color-success-800': `color-mix(in srgb, ${content?.successColor || '#28a745'} 40%, black)`,
+        '--maz-color-success-900': `color-mix(in srgb, ${content?.successColor || '#28a745'} 20%, black)`,
+        '--maz-color-danger-50': `color-mix(in srgb, ${content?.errorColor || '#ff6e6b'} 10%, white)`,
+        '--maz-color-danger-100': `color-mix(in srgb, ${content?.errorColor || '#ff6e6b'} 20%, white)`,
+        '--maz-color-danger-200': `color-mix(in srgb, ${content?.errorColor || '#ff6e6b'} 40%, white)`,
+        '--maz-color-danger-300': `color-mix(in srgb, ${content?.errorColor || '#ff6e6b'} 60%, white)`,
+        '--maz-color-danger-400': `color-mix(in srgb, ${content?.errorColor || '#ff6e6b'} 80%, white)`,
+        '--maz-color-danger-600': `color-mix(in srgb, ${content?.errorColor || '#ff6e6b'} 80%, black)`,
+        '--maz-color-danger-700': `color-mix(in srgb, ${content?.errorColor || '#ff6e6b'} 60%, black)`,
+        '--maz-color-danger-800': `color-mix(in srgb, ${content?.errorColor || '#ff6e6b'} 40%, black)`,
+        '--maz-color-danger-900': `color-mix(in srgb, ${content?.errorColor || '#ff6e6b'} 20%, black)`,
+      }
+    },
+
+    formattedPhoneNumber() {
+      if (!this.localPhoneData.phoneNumber) return ''
       
       try {
-        // Try to use the stored formatted version first
         if (this.localPhoneData.formatInternational) {
-          return this.localPhoneData.formatInternational;
+          return this.localPhoneData.formatInternational
         }
         
-        // If no stored format, generate it
         const phoneNumber = parsePhoneNumber(
           this.localPhoneData.phoneNumber,
           this.localPhoneData.countryCode
-        );
+        )
         if (phoneNumber) {
-          return phoneNumber.formatInternational();
+          return phoneNumber.formatInternational()
         }
       } catch (error) {
-        console.warn('Phone formatting error:', error);
+        console.warn('Phone formatting error:', error)
       }
       
-      // Fallback to basic formatting
-      return `+${this.countryData.dialCode} ${this.localPhoneData.phoneNumber}`;
+      return `+${this.countryData.dialCode} ${this.localPhoneData.phoneNumber}`
     }
   },
+
   watch: {
     'content.language': {
       handler(newLang) {
@@ -294,14 +290,21 @@ Object containing all phone input data:
       handler(newValue) {
         if (!newValue || typeof newValue !== 'object') return
         
-        // Only update if we have actual values to prevent unnecessary formatting
         if (newValue.phoneNumber || newValue.countryCode) {
-          this.localPhoneData = {
+          const newData = {
             ...this.localPhoneData,
             phoneNumber: newValue.phoneNumber || '',
             countryCode: newValue.countryCode || 'US'
           }
-          this.setPhoneData(this.localPhoneData)
+
+          const hasChanges = 
+            newValue.phoneNumber !== this.localPhoneData.phoneNumber || 
+            newValue.countryCode !== this.localPhoneData.countryCode
+
+          if (hasChanges) {
+            this.localPhoneData = newData
+            this.setPhoneData(newData)
+          }
         }
       },
       deep: true,
@@ -309,71 +312,91 @@ Object containing all phone input data:
     },
     phoneData: {
       handler(newValue) {
-        if (newValue === this.localPhoneData) return
-        this.localPhoneData = { ...newValue }
-        this.$emit('trigger-event', { name: 'change', event: newValue })
+        if (!newValue || typeof newValue !== 'object') return
+        
+        const hasChanges = Object.keys(newValue).some(key => 
+          JSON.stringify(newValue[key]) !== JSON.stringify(this.localPhoneData[key])
+        )
+        
+        if (hasChanges) {
+          this.localPhoneData = { ...this.localPhoneData, ...newValue }
+          this.$emit('trigger-event', { name: 'change', event: this.localPhoneData })
+        }
       },
       deep: true,
+      immediate: true
     },
   },
+
   methods: {
     async handleUpdate(data) {
-      // Only update if we have actual data
       if (data && (data.phoneNumber || data.countryCode)) {
-        this.localPhoneData = { ...this.localPhoneData, ...data }
-        this.setPhoneData(this.localPhoneData)
-      }
-    },
-    handleData(results) {
-      // Only handle data if we have actual results
-      if (results) {
-        try {
-          // Parse the phone number to get proper formatting
-          const phoneNumber = parsePhoneNumber(results.phoneNumber || '', results.countryCode)
-          const formatter = new AsYouType(results.countryCode)
-          formatter.input(results.phoneNumber || '')
-          
-          this.localPhoneData = {
-            ...this.localPhoneData,
-            ...results,
-            formatInternational: phoneNumber ? phoneNumber.formatInternational() : '',
-            formatNational: formatter.getNumber()?.formatNational || formatter.getFormattedNumber(),
-            e164: phoneNumber ? phoneNumber.format('E.164') : '',
-            nationalNumber: results.nationalNumber || '',
-            countryCallingCode: results.countryCallingCode || '',
-            isPossible: results.isPossible || false,
-            isValid: results.isValid || false
-          }
-          this.setPhoneData(this.localPhoneData)
-        } catch (error) {
-          console.warn('Phone formatting error:', error)
-          // Fallback to basic formatting if parsing fails
-          this.localPhoneData = {
-            ...this.localPhoneData,
-            ...results
-          }
-          this.setPhoneData(this.localPhoneData)
+        const newData = { ...this.localPhoneData, ...data }
+        const hasChanges = Object.keys(data).some(key => 
+          JSON.stringify(data[key]) !== JSON.stringify(this.localPhoneData[key])
+        )
+
+        if (hasChanges) {
+          this.localPhoneData = newData
+          this.setPhoneData(newData)
         }
       }
     },
-    handleCountryCode(countryCode) {
-      this.localPhoneData.countryCode = countryCode
-      this.setPhoneData(this.localPhoneData)
-      this.$emit('trigger-event', { name: 'country-change', event: { countryCode } })
+
+    handleData(results) {
+      if (!results) return
+
+      try {
+        const phoneNumber = parsePhoneNumber(results.phoneNumber || '', results.countryCode)
+        const formatter = new AsYouType(results.countryCode)
+        formatter.input(results.phoneNumber || '')
+        
+        const newData = {
+          ...this.localPhoneData,
+          ...results,
+          formatInternational: phoneNumber ? phoneNumber.formatInternational() : '',
+          formatNational: formatter.getNumber()?.formatNational || formatter.getFormattedNumber(),
+          e164: phoneNumber ? phoneNumber.format('E.164') : '',
+          nationalNumber: results.nationalNumber || '',
+          countryCallingCode: results.countryCallingCode || '',
+          isPossible: results.isPossible || false,
+          isValid: results.isValid || false
+        }
+
+        const hasChanges = Object.keys(newData).some(key => 
+          JSON.stringify(newData[key]) !== JSON.stringify(this.localPhoneData[key])
+        )
+
+        if (hasChanges) {
+          this.localPhoneData = newData
+          this.setPhoneData(newData)
+        }
+      } catch (error) {
+        console.warn('Phone formatting error:', error)
+      }
     },
+
+    handleCountryCode(countryCode) {
+      if (countryCode !== this.localPhoneData.countryCode) {
+        this.localPhoneData.countryCode = countryCode
+        this.setPhoneData(this.localPhoneData)
+        this.$emit('trigger-event', { name: 'country-change', event: { countryCode } })
+      }
+    },
+
     getDialCode(code) {
       const dialCodes = {
         'US': '1',
         'GB': '44',
         'FR': '33',
-        // Add more as needed
         'DE': '49',
         'IT': '39',
         'ES': '34',
         'CA': '1',
-      };
-      return dialCodes[code] || '';
+      }
+      return dialCodes[code] || ''
     },
+
     getCountryFlag(countryCode) {
       const code = countryCode.toUpperCase()
       if (countryFlagIcons[code]) {
@@ -400,7 +423,6 @@ Object containing all phone input data:
   --maz-color-bg-dark: var(--maz-color-bg) !important;
   --maz-color-bg-light: var(--maz-color-bg) !important;
   --maz-color-bg-lighter: var(--maz-color-bg) !important;
-
   border-color: v-bind('content?.borderColor || "rgba(0, 0, 0, 0.2)"') !important;
 }
 
@@ -418,7 +440,6 @@ Object containing all phone input data:
     }
   }
 
-  /* Ensure proper alignment of the select input */
   :deep(.maz-select__input-wrapper) {
     display: flex;
     align-items: center;
@@ -426,16 +447,12 @@ Object containing all phone input data:
   }
 }
 
-/* Error state */
 .error-message {
   color: v-bind('content?.errorColor || "#dc3545"');
   margin-top: 0.5rem;
   font-size: 0.875rem;
 }
 
-
-
-/* Loading state */
 .phone-input-container.is-loading {
   pointer-events: none;
 }
@@ -477,38 +494,17 @@ Object containing all phone input data:
   display: inline-flex;
   width: 20px;
   height: 15px;
+
+  :deep(svg) {
+    width: 100%;
+    height: 100%;
+    border-radius: 2px;
+    display: block;
+  }
 }
 
-.country-flag :deep(svg) {
-  width: 100%;
-  height: 100%;
-  border-radius: 2px;
-  display: block;
-}
-
-/* Improve flag display in the input */
-.phone-input-container :deep(.maz-select__flag) {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 15px;
-  overflow: hidden;
-}
-
-/* Improve flag display in the dropdown */
-.phone-input-container :deep(.maz-select__options-list-item) {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-}
-
-.phone-input-container :deep(.maz-select__options-list-item .country-flag) {
-  flex-shrink: 0;
-}
-
-/* Improve flag display in readonly mode */
+/* Flag display improvements */
+.phone-input-container :deep(.maz-select__flag),
 .phone-readonly-display .phone-flag {
   display: flex;
   align-items: center;
@@ -516,6 +512,17 @@ Object containing all phone input data:
   width: 20px;
   height: 15px;
   overflow: hidden;
+}
+
+.phone-input-container :deep(.maz-select__options-list-item) {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+
+  .country-flag {
+    flex-shrink: 0;
+  }
 }
 
 .phone-readonly-display .country-flag {

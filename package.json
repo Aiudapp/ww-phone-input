@@ -8,7 +8,7 @@
   "dependencies": {
     "country-flag-icons": "^1.5.19",
     "libphonenumber-js": "^1.12.9",
-    "maz-ui": "^3.50.1",
+    "maz-ui": "^3.49.0",
     "vue-country-flag-next": "^2.3.2"
   },
   "devDependencies": {
