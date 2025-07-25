@@ -13,5 +13,7 @@
   },
   "devDependencies": {
     "@weweb/cli": "latest"
+  },"overrides": {
+    "chart.js": "^3.9.1"
   }
 }
