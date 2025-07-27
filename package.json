@@ -8,12 +8,10 @@
   "dependencies": {
     "country-flag-icons": "^1.5.19",
     "libphonenumber-js": "^1.12.9",
-    "maz-ui": "^3.49.0",
+    "@hugodev-oc/maz-ui-custom" : "3.50.3",
     "vue-country-flag-next": "^2.3.2"
   },
   "devDependencies": {
     "@weweb/cli": "latest"
-  },"overrides": {
-    "chart.js": "^3.9.1"
   }
 }

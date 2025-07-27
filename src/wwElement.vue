@@ -48,8 +48,8 @@
 <script>
 import { computed, ref, onMounted, onErrorCaptured, watch } from 'vue'
 import { AsYouType, parsePhoneNumber } from 'libphonenumber-js'
-import MazPhoneNumberInput from 'maz-ui/components/MazPhoneNumberInput.mjs'
-import 'maz-ui/css/main.css'
+import MazPhoneNumberInput from '@hugodev-oc/maz-ui-custom/components/MazPhoneNumberInput.mjs'
+import '@hugodev-oc/maz-ui-custom/css/main.css'
 import * as countryFlagIcons from 'country-flag-icons/string/3x2'
 
 // Translations object moved outside component for better performance
