@@ -18,8 +18,9 @@
       v-model="localPhoneData.phoneNumber"
       v-model:country-code="localPhoneData.countryCode"
       size="sm"
+      :orientation="content?.orientation ?? 'responsive'"
       :show-code-on-list="content?.showCodeOnList ?? true"
-      :preferred-countries="content?.preferredCountries ?? ['FR', 'GB', 'CA', 'US', 'DE']"
+      :preferred-countries="preferredCountriesArray"
       :country-locale="countryLocale"
       :auto-format="content?.autoFormat ?? true"
       :style="mazInputStyles"
@@ -225,7 +226,7 @@ Object containing phone input data:
         '--maz-color-bg-lighter': content?.backgroundColor || '#ffffff',
         '--maz-color-text': content?.textColor || '#333333',
         '--maz-color-placeholder': content?.placeholderColor || '#999999',
-        '--maz-border-radius': '8px',
+        '--maz-border-radius': content?.borderRadius || '8px',
         '--maz-select-color': content?.textColor || '#333333',
         '--maz-dropdown-color': content?.textColor || '#333333',
         '--maz-dropdown-item-color': content?.textColor || '#333333',
@@ -276,6 +277,27 @@ Object containing phone input data:
       }
       
       return `+${this.countryData.dialCode} ${this.localPhoneData.phoneNumber}`
+    },
+
+    preferredCountriesArray() {
+      if (!this.content?.preferredCountries) {
+        return ['FR', 'GB', 'CA', 'US', 'DE']
+      }
+      
+      // Handle both string and array formats for backward compatibility
+      if (Array.isArray(this.content.preferredCountries)) {
+        return this.content.preferredCountries
+      }
+      
+      // Convert comma-separated string to array
+      if (typeof this.content.preferredCountries === 'string') {
+        return this.content.preferredCountries
+          .split(',')
+          .map(country => country.trim())
+          .filter(country => country.length > 0)
+      }
+      
+      return ['FR', 'GB', 'CA', 'US', 'DE']
     }
   },
 
@@ -433,7 +455,44 @@ Object containing phone input data:
   --maz-color-bg-dark: var(--maz-color-bg) !important;
   --maz-color-bg-light: var(--maz-color-bg) !important;
   --maz-color-bg-lighter: var(--maz-color-bg) !important;
-  border-color: v-bind('content?.borderColor || "rgba(0, 0, 0, 0.2)"') !important;
+  --maz-color-bg: v-bind('content?.borderColor || "rgba(0, 0, 0, 0.2)"') !important;
+}
+
+/* Fix column orientation layout */
+.phone-input-container :deep(.maz-phone-number-input.--orientation-col) {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.phone-input-container :deep(.maz-phone-number-input.--orientation-col .maz-select) {
+  margin-bottom: 0;
+}
+
+.phone-input-container :deep(.maz-phone-number-input.--orientation-col .maz-input) {
+  margin-top: 0;
+}
+
+/* Override problematic align-items rule for column orientation */
+.phone-input-container :deep(.maz-phone-number-input.--orientation-col .m-input) {
+  align-items: unset important;
+}
+
+/* Fix row orientation layout */
+.phone-input-container :deep(.maz-phone-number-input.--orientation-row) {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.phone-input-container :deep(.maz-phone-number-input.--orientation-row .maz-select) {
+  flex-shrink: 0;
+  min-width: 120px;
+}
+
+.phone-input-container :deep(.maz-phone-number-input.--orientation-row .maz-input) {
+  flex: 1;
 }
 
 /* Fix dropdown caret visibility */
@@ -529,11 +588,18 @@ Object containing phone input data:
   align-items: center;
   gap: 8px;
   padding: 8px 12px;
+  
 
   .country-flag {
     flex-shrink: 0;
   }
 }
+
+/* Style the country name text in dropdown */
+.phone-input-container :deep(.maz-flex-1.maz-truncate:not(.maz-font-semibold)) {
+  color: v-bind('content?.textColor || "#333333"') !important;
+}
+
 
 .phone-readonly-display .country-flag {
   flex-shrink: 0;

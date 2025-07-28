@@ -45,7 +45,7 @@ export default {
       responsive: true,
       states: true,
       defaultValue: '#333333',
-      section: 'settings',
+      section: 'styling',
       /* wwEditor:start */
       bindingValidation: {
         cssSupports: 'color',
@@ -64,7 +64,7 @@ export default {
       responsive: true,
       states: true,
       defaultValue: 'rgba(0, 0, 0, 0.2)',
-      section: 'settings',
+      section: 'styling',
       /* wwEditor:start */
       bindingValidation: {
         cssSupports: 'border-color',
@@ -83,7 +83,7 @@ export default {
       responsive: true,
       states: true,
       defaultValue: '#ffffff',
-      section: 'settings',
+      section: 'styling',
       /* wwEditor:start */
       bindingValidation: {
         cssSupports: 'background-color',
@@ -102,7 +102,7 @@ export default {
       responsive: true,
       states: true,
       defaultValue: '#333333',
-      section: 'settings',
+      section: 'styling',
       /* wwEditor:start */
       bindingValidation: {
         cssSupports: 'color',
@@ -121,7 +121,7 @@ export default {
       responsive: true,
       states: true,
       defaultValue: '#999999',
-      section: 'settings',
+      section: 'styling',
       /* wwEditor:start */
       bindingValidation: {
         cssSupports: 'color',
@@ -135,7 +135,7 @@ export default {
       type: 'OnOff',
       bindable: true,
       defaultValue: false,
-      section: 'settings',
+      section: 'styling',
       /* wwEditor:start */
       bindingValidation: {
         type: 'boolean',
@@ -176,31 +176,22 @@ export default {
       /* wwEditor:end */
     },
     preferredCountries: {
-      label: { en: 'Preferred countries' },
-      type: 'Array',
-      bindable: true,
-      defaultValue: ['FR', 'GB', 'CA','US' , 'DE'],
-      section: 'settings',
-      /* wwEditor:start */
-      bindingValidation: {
-        type: 'array',
-        tooltip: 'Array of preferred country codes to show at the top',
+      label: { 
+        en: 'Preferred countries',
+        fr: 'Pays préférés'
       },
-      /* wwEditor:end */
-    },
-    countryLocale: {
-      label: { en: 'Country locale' },
       type: 'Text',
       bindable: true,
-      defaultValue: 'fr-FR',
+      defaultValue: 'FR,GB,CA,US,DE',
       section: 'settings',
       /* wwEditor:start */
       bindingValidation: {
         type: 'string',
-        tooltip: 'Locale for country names display',
+        tooltip: 'Comma-separated list of country codes (e.g., "FR,GB,CA,US,DE") to show at the top of the dropdown',
       },
       /* wwEditor:end */
     },
+
     autoFormat: {
       label: { en: 'Auto format' },
       type: 'OnOff',
@@ -219,7 +210,7 @@ export default {
       type: 'TextSelect',
       bindable: true,
       defaultValue: 'responsive',
-      section: 'settings',
+      section: 'styling',
       options: {
         options: [
           { value: 'responsive', label: { en: 'Responsive', fr: 'Responsive' } },
@@ -261,7 +252,7 @@ export default {
       responsive: true,
       states: true,
       defaultValue: '#28a745',
-      section: 'settings',
+      section: 'styling',
       /* wwEditor:start */
       bindingValidation: {
         cssSupports: 'color',
@@ -281,12 +272,31 @@ export default {
       responsive: true,
       states: true,
       defaultValue: '#dc3545',
-      section: 'settings',
+      section: 'styling',
       /* wwEditor:start */
       bindingValidation: {
         cssSupports: 'color',
         type: 'string',
         tooltip: 'A string that represents a color code for error state'
+      }
+      /* wwEditor:end */
+    },
+    borderRadius: {
+      label: {
+        en: 'Border radius (Refresh to apply)',
+        fr: 'Rayon de bordure (Refresh to apply)'
+      },
+      type: 'Text',
+      bindable: true,
+      responsive: true,
+      states: true,
+      defaultValue: '8px',
+      section: 'styling',
+      /* wwEditor:start */
+      bindingValidation: {
+        cssSupports: 'border-radius',
+        type: 'string',
+        tooltip: 'Border radius for the input fields (e.g., "8px", "4px", "12px")'
       }
       /* wwEditor:end */
     },
