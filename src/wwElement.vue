@@ -93,14 +93,6 @@ const defaultPhoneData = {
   type: '',
   e164: '',
   regionCode: '',
-  number: {
-    input: '',
-    international: '',
-    national: '',
-    e164: '',
-    rfc3966: '',
-    significant: '',
-  },
 }
 
 export default {
