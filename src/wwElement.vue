@@ -23,6 +23,7 @@
       :preferred-countries="preferredCountriesArray"
       :country-locale="countryLocale"
       :auto-format="content?.autoFormat ?? true"
+      :dark="content?.darkMode ?? false"
       :style="mazInputStyles"
       :disabled="isLoading"
       :error="showError"
@@ -254,6 +255,8 @@ Object containing phone input data:
         '--maz-color-danger-700': `color-mix(in srgb, ${content?.errorColor || '#ff6e6b'} 60%, black)`,
         '--maz-color-danger-800': `color-mix(in srgb, ${content?.errorColor || '#ff6e6b'} 40%, black)`,
         '--maz-color-danger-900': `color-mix(in srgb, ${content?.errorColor || '#ff6e6b'} 20%, black)`,
+        // The following line was duplicated and had a syntax error; fix to only set it once and with correct value:
+        '--maz-color-bg-lighter': content?.borderColor || 'rgba(0, 0, 0, 0.2)',
       }
     },
 
@@ -454,7 +457,6 @@ Object containing phone input data:
   --maz-color-bg: var(--maz-color-bg) !important;
   --maz-color-bg-dark: var(--maz-color-bg) !important;
   --maz-color-bg-light: var(--maz-color-bg) !important;
-  --maz-color-bg-lighter: var(--maz-color-bg) !important;
   --maz-color-bg: v-bind('content?.borderColor || "rgba(0, 0, 0, 0.2)"') !important;
 }
 
