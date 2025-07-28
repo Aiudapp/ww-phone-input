@@ -320,7 +320,7 @@ Object containing phone input data:
         
         if (hasChanges) {
           this.localPhoneData = { ...this.localPhoneData, ...newValue }
-          this.$emit('trigger-event', { name: 'change', event: this.localPhoneData })
+          // Note: Change events are now emitted directly in handleUpdate, handleData, and handleCountryCode methods
         }
       },
       deep: true,
@@ -329,6 +329,11 @@ Object containing phone input data:
   },
 
   methods: {
+    // Centralized method to emit change event
+    emitChangeEvent() {
+      this.$emit('trigger-event', { name: 'change', event: this.localPhoneData })
+    },
+
     async handleUpdate(data) {
       if (data && (data.phoneNumber || data.countryCode)) {
         const newData = { ...this.localPhoneData, ...data }
@@ -339,6 +344,8 @@ Object containing phone input data:
         if (hasChanges) {
           this.localPhoneData = newData
           this.setPhoneData(newData)
+          // Only emit change event here for user input updates
+          this.emitChangeEvent()
         }
       }
     },
@@ -370,6 +377,7 @@ Object containing phone input data:
         if (hasChanges) {
           this.localPhoneData = newData
           this.setPhoneData(newData)
+          // Don't emit change event here as it's already emitted in handleUpdate
         }
       } catch (error) {
         console.warn('Phone formatting error:', error)
@@ -380,7 +388,9 @@ Object containing phone input data:
       if (countryCode !== this.localPhoneData.countryCode) {
         this.localPhoneData.countryCode = countryCode
         this.setPhoneData(this.localPhoneData)
+        // Emit both country-change and change events when country is changed
         this.$emit('trigger-event', { name: 'country-change', event: { countryCode } })
+        this.emitChangeEvent()
       }
     },
 
