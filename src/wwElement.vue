@@ -2,6 +2,7 @@
   <div
     class="phone-input-container"
     :class="containerClasses"
+    :data-size="currentSize"
   >
     <!-- Read Only View -->
     <div v-if="isReadOnly" class="phone-readonly-display">
@@ -17,7 +18,7 @@
       v-else
       v-model="localPhoneData.phoneNumber"
       v-model:country-code="localPhoneData.countryCode"
-      size="sm"
+      :size="currentSize"
       :orientation="content?.orientation ?? 'responsive'"
       :show-code-on-list="content?.showCodeOnList ?? true"
       :preferred-countries="preferredCountriesArray"
@@ -248,7 +249,7 @@ Object containing phone input data:
         '--maz-color-danger-800': `color-mix(in srgb, ${content?.errorColor || '#ff6e6b'} 40%, black)`,
         '--maz-color-danger-900': `color-mix(in srgb, ${content?.errorColor || '#ff6e6b'} 20%, black)`,
         // The following line was duplicated and had a syntax error; fix to only set it once and with correct value:
-        '--maz-color-bg-lighter': content?.borderColor || 'rgba(0, 0, 0, 0.2)',
+        '--maz-color-bg-lighter': content?.borderColor || 'rgba(0, 0, 0, 0.2)'
       }
     },
 
@@ -293,6 +294,12 @@ Object containing phone input data:
       }
       
       return ['FR', 'GB', 'CA', 'US', 'DE']
+    },
+
+    currentSize() {
+      const size = this.content?.size || 'sm'
+      console.log('Phone input size:', size)
+      return size
     }
   },
 
@@ -300,6 +307,12 @@ Object containing phone input data:
     'content.language': {
       handler(newLang) {
         console.log('Language changed to:', newLang)
+      },
+      immediate: true,
+    },
+    'content.size': {
+      handler(newSize) {
+        console.log('Size changed to:', newSize)
       },
       immediate: true,
     },
@@ -468,9 +481,7 @@ Object containing phone input data:
 }
 
 /* Override problematic align-items rule for column orientation */
-.phone-input-container :deep(.maz-phone-number-input.--orientation-col .m-input) {
-  align-items: unset important;
-}
+
 
 /* Fix row orientation layout */
 .phone-input-container :deep(.maz-phone-number-input.--orientation-row) {
@@ -480,10 +491,7 @@ Object containing phone input data:
   align-items: flex-end;
 }
 
-.phone-input-container :deep(.maz-phone-number-input.--orientation-row .maz-select) {
-  flex-shrink: 0;
-  min-width: 120px;
-}
+
 
 .phone-input-container :deep(.maz-phone-number-input.--orientation-row .maz-input) {
   flex: 1;
@@ -542,6 +550,9 @@ Object containing phone input data:
     font-size: 1em;
   }
 }
+.m-phone-input{
+  min-width:unset !important;
+}
 
 .phone-readonly-empty {
   display: flex;
@@ -566,14 +577,98 @@ Object containing phone input data:
   }
 }
 
+/* Size-specific flag sizing - using more direct targeting */
+.phone-input-container :deep(.maz-phone-number-input[data-size="mini"] .country-flag),
+.phone-input-container :deep(.maz-phone-number-input[data-size="mini"] .maz-select__flag),
+.phone-input-container :deep(.maz-phone-number-input.--size-mini .country-flag),
+.phone-input-container :deep(.maz-phone-number-input.--size-mini .maz-select__flag) {
+  width: 14px;
+  height: 11px;
+}
+
+.phone-input-container :deep(.maz-phone-number-input[data-size="xs"] .country-flag),
+.phone-input-container :deep(.maz-phone-number-input[data-size="xs"] .maz-select__flag),
+.phone-input-container :deep(.maz-phone-number-input.--size-xs .country-flag),
+.phone-input-container :deep(.maz-phone-number-input.--size-xs .maz-select__flag) {
+  width: 15px;
+  height: 12.5px;
+}
+
+.phone-input-container :deep(.maz-phone-number-input[data-size="sm"] .country-flag),
+.phone-input-container :deep(.maz-phone-number-input[data-size="sm"] .maz-select__flag),
+.phone-input-container :deep(.maz-phone-number-input.--size-sm .country-flag),
+.phone-input-container :deep(.maz-phone-number-input.--size-sm .maz-select__flag) {
+  width: 20px;
+  height: 15px;
+}
+
+.phone-input-container :deep(.maz-phone-number-input[data-size="md"] .country-flag),
+.phone-input-container :deep(.maz-phone-number-input[data-size="md"] .maz-select__flag),
+.phone-input-container :deep(.maz-phone-number-input.--size-md .country-flag),
+.phone-input-container :deep(.maz-phone-number-input.--size-md .maz-select__flag) {
+  width: 22px;
+  height: 16.5px;
+}
+
+.phone-input-container :deep(.maz-phone-number-input[data-size="lg"] .country-flag),
+.phone-input-container :deep(.maz-phone-number-input[data-size="lg"] .maz-select__flag),
+.phone-input-container :deep(.maz-phone-number-input.--size-lg .country-flag),
+.phone-input-container :deep(.maz-phone-number-input.--size-lg .maz-select__flag) {
+  width: 24px;
+  height: 18px;
+}
+
+.phone-input-container :deep(.maz-phone-number-input[data-size="xl"] .country-flag),
+.phone-input-container :deep(.maz-phone-number-input[data-size="xl"] .maz-select__flag),
+.phone-input-container :deep(.maz-phone-number-input.--size-xl .country-flag),
+.phone-input-container :deep(.maz-phone-number-input.--size-xl .maz-select__flag) {
+  width: 26px;
+  height: 19.5px;
+}
+
+/* Alternative approach - target the container with size attribute */
+.phone-input-container[data-size="mini"] :deep(.country-flag),
+.phone-input-container[data-size="mini"] :deep(.maz-select__flag) {
+  width: 16px;
+  height: 12px;
+}
+
+.phone-input-container[data-size="xs"] :deep(.country-flag),
+.phone-input-container[data-size="xs"] :deep(.maz-select__flag) {
+  width: 18px;
+  height: 13.5px;
+}
+
+.phone-input-container[data-size="sm"] :deep(.country-flag),
+.phone-input-container[data-size="sm"] :deep(.maz-select__flag) {
+  width: 20px;
+  height: 15px;
+}
+
+.phone-input-container[data-size="md"] :deep(.country-flag),
+.phone-input-container[data-size="md"] :deep(.maz-select__flag) {
+  width: 22px;
+  height: 16.5px;
+}
+
+.phone-input-container[data-size="lg"] :deep(.country-flag),
+.phone-input-container[data-size="lg"] :deep(.maz-select__flag) {
+  width: 24px;
+  height: 18px;
+}
+
+.phone-input-container[data-size="xl"] :deep(.country-flag),
+.phone-input-container[data-size="xl"] :deep(.maz-select__flag) {
+  width: 26px;
+  height: 19.5px;
+}
+
 /* Flag display improvements */
 .phone-input-container :deep(.maz-select__flag),
 .phone-readonly-display .phone-flag {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 15px;
   overflow: hidden;
 }
 

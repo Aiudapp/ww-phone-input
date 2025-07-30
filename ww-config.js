@@ -281,10 +281,36 @@ export default {
       }
       /* wwEditor:end */
     },
+    size: {
+      label: {
+        en: 'Size',
+        fr: 'Taille'
+      },
+      type: 'TextSelect',
+      bindable: true,
+      defaultValue: 'sm',
+      section: 'styling',
+      options: {
+        options: [
+          { value: 'mini', label: { en: 'Mini', fr: 'Mini' } },
+          { value: 'xs', label: { en: 'Extra Small', fr: 'Très petit' } },
+          { value: 'sm', label: { en: 'Small', fr: 'Petit' } },
+          { value: 'md', label: { en: 'Medium', fr: 'Moyen' } },
+          { value: 'lg', label: { en: 'Large', fr: 'Grand' } },
+          { value: 'xl', label: { en: 'Extra Large', fr: 'Très grand' } },
+        ],
+      },
+      /* wwEditor:start */
+      bindingValidation: {
+        type: 'string',
+        tooltip: 'Select the size of the phone input component',
+      },
+      /* wwEditor:end */
+    },
     borderRadius: {
       label: {
-        en: 'Border radius (Refresh to apply)',
-        fr: 'Rayon de bordure (Refresh to apply)'
+        en: 'Border radius',
+        fr: 'Rayon de bordure'
       },
       type: 'Text',
       bindable: true,
