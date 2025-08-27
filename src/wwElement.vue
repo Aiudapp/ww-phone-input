@@ -364,19 +364,37 @@ Object containing phone input data:
       this.$emit('trigger-event', { name: 'change', event: this.localPhoneData })
     },
 
-    async handleUpdate(data) {
-      if (data && (data.phoneNumber || data.countryCode)) {
-        const newData = { ...this.localPhoneData, ...data }
-        const hasChanges = Object.keys(data).some(key => 
-          JSON.stringify(data[key]) !== JSON.stringify(this.localPhoneData[key])
-        )
+    // Fired when the underlying v-model (raw phone string) changes
+    handleModelValue(phoneNumber) {
+      const normalizedPhone = phoneNumber ?? ''
+      if (normalizedPhone !== this.localPhoneData.phoneNumber) {
+        const newData = { ...this.localPhoneData, phoneNumber: normalizedPhone }
+        this.localPhoneData = newData
+        this.setPhoneData(newData)
+        this.emitChangeEvent()
+      }
+    },
 
-        if (hasChanges) {
-          this.localPhoneData = newData
-          this.setPhoneData(newData)
-          // Only emit change event here for user input updates
-          this.emitChangeEvent()
-        }
+    async handleUpdate(data) {
+      if (!data) return
+
+      // Normalize payload so clearing the input propagates an empty value
+      const normalizedData = {
+        ...data,
+        phoneNumber: data.phoneNumber ?? '',
+        nationalNumber: data.nationalNumber ?? '',
+      }
+
+      const newData = { ...this.localPhoneData, ...normalizedData }
+      const hasChanges = Object.keys(normalizedData).some(key =>
+        JSON.stringify(normalizedData[key]) !== JSON.stringify(this.localPhoneData[key])
+      )
+
+      if (hasChanges) {
+        this.localPhoneData = newData
+        this.setPhoneData(newData)
+        // Only emit change event here for user input updates
+        this.emitChangeEvent()
       }
     },
 
@@ -391,11 +409,13 @@ Object containing phone input data:
         const newData = {
           ...this.localPhoneData,
           ...results,
+          // Ensure we drop the last digit when field is cleared
+          phoneNumber: results.phoneNumber ?? '',
           formatInternational: phoneNumber ? phoneNumber.formatInternational() : '',
           formatNational: formatter.getNumber()?.formatNational || formatter.getFormattedNumber(),
           e164: phoneNumber ? phoneNumber.format('E.164') : '',
-          nationalNumber: results.nationalNumber || '',
-          countryCallingCode: results.countryCallingCode || '',
+          nationalNumber: results.nationalNumber ?? '',
+          countryCallingCode: results.countryCallingCode ?? '',
           isPossible: results.isPossible || false,
           isValid: results.isValid || false
         }
