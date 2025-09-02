@@ -567,7 +567,7 @@ Object containing phone input data:
   
   .phone-number-text {
     color: v-bind('content?.textColor || "#333333"');
-    font-size: 1em;
+    font-size: v-bind('content?.readOnlyFontSize || "14px"');
   }
 }
 .m-phone-input{
@@ -581,7 +581,7 @@ Object containing phone input data:
   border-radius: 4px;
   background-color: var(--ww-color-light-100);
   color: v-bind('content?.placeholderColor || "#999999"');
-  font-size: 1em;
+  font-size: v-bind('content?.readOnlyFontSize || "14px"');
 }
 
 .country-flag {

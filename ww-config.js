@@ -307,6 +307,26 @@ export default {
       },
       /* wwEditor:end */
     },
+    readOnlyFontSize: {
+      label: {
+        en: 'Read-only font size',
+        fr: 'Taille de police (lecture seule)'
+      },
+      type: 'Text',
+      classes: true,
+      bindable: true,
+      responsive: true,
+      states: true,
+      defaultValue: '14px',
+      section: 'styling',
+      /* wwEditor:start */
+      bindingValidation: {
+        cssSupports: 'font-size',
+        type: 'string',
+        tooltip: 'CSS font-size value for read-only text (e.g., "14px")'
+      }
+      /* wwEditor:end */
+    },
     borderRadius: {
       label: {
         en: 'Border radius',
