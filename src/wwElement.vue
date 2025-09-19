@@ -18,6 +18,7 @@
       v-else
       v-model="localPhoneData.phoneNumber"
       v-model:country-code="localPhoneData.countryCode"
+      block
       :size="currentSize"
       :orientation="content?.orientation ?? 'responsive'"
       :show-code-on-list="content?.showCodeOnList ?? true"
@@ -476,6 +477,14 @@ Object containing phone input data:
   transition: none;
 }
 
+/* Ensure the Maz phone input stretches to full container width */
+.phone-input-container :deep(.maz-phone-number-input),
+.phone-input-container :deep(.maz-input-phone-number),
+.phone-input-container :deep(.m-phone-input) {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
 /* Override Maz UI default styles */
 .phone-input-container :deep(.maz-input) {
   --maz-bg-color: var(--input-bg-color) !important;
@@ -492,6 +501,7 @@ Object containing phone input data:
   gap: 8px;
 }
 
+
 .phone-input-container :deep(.maz-phone-number-input.--orientation-col .maz-select) {
   margin-bottom: 0;
 }
@@ -499,9 +509,28 @@ Object containing phone input data:
 .phone-input-container :deep(.maz-phone-number-input.--orientation-col .maz-input) {
   margin-top: 0;
 }
+/* make the host container full width */
+.phone-input-container {
+  width: 100%;
+  display: block;
+}
 
-/* Override problematic align-items rule for column orientation */
+/* make the Maz component and its wrappers full width */
+.phone-input-container :deep(.maz-phone-number-input),
+.phone-input-container :deep(.m-phone-input),
+.phone-input-container :deep(.m-input-wrapper),
+.phone-input-container :deep(.m-input-wrapper-input),
+.phone-input-container :deep(.maz-input),
+.phone-input-container :deep(.m-input) {
+  width: 100% !important;
+  max-width: 100% !important;   /* override any internal cap (e.g., 320px) */
+  min-width: 0 !important;      /* avoid flex min-width squeezing issues */
+}
 
+/* ensure the actual <input> fills the line */
+.phone-input-container :deep(input.m-input-input) {
+  width: 100% !important;
+}
 
 /* Fix row orientation layout */
 .phone-input-container :deep(.maz-phone-number-input.--orientation-row) {
@@ -597,7 +626,7 @@ Object containing phone input data:
   }
 }
 
-/* Size-specific flag sizing - using more direct targeting */
+
 .phone-input-container :deep(.maz-phone-number-input[data-size="mini"] .country-flag),
 .phone-input-container :deep(.maz-phone-number-input[data-size="mini"] .maz-select__flag),
 .phone-input-container :deep(.maz-phone-number-input.--size-mini .country-flag),
@@ -649,14 +678,14 @@ Object containing phone input data:
 /* Alternative approach - target the container with size attribute */
 .phone-input-container[data-size="mini"] :deep(.country-flag),
 .phone-input-container[data-size="mini"] :deep(.maz-select__flag) {
-  width: 16px;
-  height: 12px;
+  width: 13px;
+  height: 11px;
 }
 
 .phone-input-container[data-size="xs"] :deep(.country-flag),
 .phone-input-container[data-size="xs"] :deep(.maz-select__flag) {
-  width: 18px;
-  height: 13.5px;
+ width: 15px;
+  height: 12.5px;
 }
 
 .phone-input-container[data-size="sm"] :deep(.country-flag),
