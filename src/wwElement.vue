@@ -174,7 +174,18 @@ Object containing phone input data:
       isLoading: false,
       showError: false,
       showSuccess: false,
+      isInitializing: true,
+      previousReadOnlyState: null,
     }
+  },
+
+  mounted() {
+    // Allow the component to initialize, then enable change events
+    this.$nextTick(() => {
+      setTimeout(() => {
+        this.isInitializing = false
+      }, 150)
+    })
   },
 
   computed: {
@@ -317,6 +328,22 @@ Object containing phone input data:
       },
       immediate: true,
     },
+    'content.readOnly': {
+      handler(newValue, oldValue) {
+        // Track when transitioning from readOnly to editable
+        if (this.previousReadOnlyState === true && newValue === false) {
+          this.isInitializing = true
+          // Allow the component to initialize, then enable change events
+          this.$nextTick(() => {
+            setTimeout(() => {
+              this.isInitializing = false
+            }, 100)
+          })
+        }
+        this.previousReadOnlyState = newValue
+      },
+      immediate: true,
+    },
     'content.initialValue': {
       handler(newValue) {
         if (!newValue || typeof newValue !== 'object') return
@@ -333,8 +360,15 @@ Object containing phone input data:
             newValue.countryCode !== this.localPhoneData.countryCode
 
           if (hasChanges) {
+            this.isInitializing = true
             this.localPhoneData = newData
             this.setPhoneData(newData)
+            // Reset initialization flag after update
+            this.$nextTick(() => {
+              setTimeout(() => {
+                this.isInitializing = false
+              }, 100)
+            })
           }
         }
       },
@@ -362,6 +396,10 @@ Object containing phone input data:
   methods: {
     // Centralized method to emit change event
     emitChangeEvent() {
+      // Don't emit change events during initialization or when transitioning from readOnly
+      if (this.isInitializing) {
+        return
+      }
       this.$emit('trigger-event', { name: 'change', event: this.localPhoneData })
     },
 
