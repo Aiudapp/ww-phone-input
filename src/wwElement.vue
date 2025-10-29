@@ -384,8 +384,15 @@ Object containing phone input data:
         )
         
         if (hasChanges) {
+          // Set initialization flag to prevent change events during external updates
+          this.isInitializing = true
           this.localPhoneData = { ...this.localPhoneData, ...newValue }
-          // Note: Change events are now emitted directly in handleUpdate, handleData, and handleCountryCode methods
+          // Reset initialization flag after update
+          this.$nextTick(() => {
+            setTimeout(() => {
+              this.isInitializing = false
+            }, 100)
+          })
         }
       },
       deep: true,
