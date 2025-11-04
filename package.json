@@ -1,5 +1,5 @@
 {
-  "name": "phone-input",
+  "name": "phone-input-v2",
   "version": "1.0.0",
   "scripts": {
     "build": "weweb build",
