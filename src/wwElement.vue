@@ -16,7 +16,7 @@
 
 <script>
 import { MazPhoneNumberInput } from 'maz-ui'
-import '@maz-ui/components/modules/maz-phone-number-input/MazPhoneNumberInput.css'
+import 'maz-ui/components/MazPhoneNumberInput.css'
 
 export default {
   name: 'PhoneInput',

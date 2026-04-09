@@ -8,7 +8,6 @@
     "serve": "weweb serve"
   },
   "dependencies": {
-    "@maz-ui/components": "^3.50.1",
     "maz-ui": "^3.50.1",
     "libphonenumber-js": "^1.10.0"
   },
