@@ -5,6 +5,11 @@
     "build": "weweb build",
     "serve": "weweb serve"
   },
+  "overrides": {
+    "@hugodev-oc/maz-ui-custom": {
+      "vue-router": "$vue-router"
+    }
+  },
   "dependencies": {
     "country-flag-icons": "^1.5.19",
     "libphonenumber-js": "^1.12.9",
