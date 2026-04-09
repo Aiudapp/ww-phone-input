@@ -6,9 +6,7 @@
     "serve": "weweb serve"
   },
   "overrides": {
-    "@hugodev-oc/maz-ui-custom": {
-      "vue-router": "$vue-router"
-    }
+    "vue-router": ">=4.0.0"
   },
   "dependencies": {
     "country-flag-icons": "^1.5.19",
