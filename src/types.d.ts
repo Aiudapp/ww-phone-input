@@ -1,15 +1,16 @@
-declare module '@hugodev-oc/maz-ui-custom/components/MazPhoneNumberInput.mjs' {
+declare module 'maz-ui/dist/components/MazInputPhoneNumber.js' {
   import { DefineComponent } from 'vue'
-  
-  interface MazPhoneNumberInputProps {
+
+  interface MazInputPhoneNumberProps {
     modelValue?: string
-    'onUpdate:modelValue'?: (value: string) => void
-    'onUpdate:countryCode'?: (code: string) => void
+    countryCode?: string
     size?: string
-    'show-code-on-list'?: boolean
-    'preferred-countries'?: string[]
-    'country-locale'?: string
-    'auto-format'?: boolean
+    showCodeInList?: boolean
+    preferredCountries?: string[]
+    countryLocale?: string
+    autoFormat?: 'blur' | 'typing' | 'disabled' | false
+    orientation?: 'row' | 'col' | 'responsive'
+    block?: boolean
     style?: Record<string, string>
     disabled?: boolean
     error?: boolean
@@ -17,17 +18,18 @@ declare module '@hugodev-oc/maz-ui-custom/components/MazPhoneNumberInput.mjs' {
     translations?: Record<string, any>
   }
 
-  interface MazPhoneNumberInputEmits {
-    update: (data: any) => void
+  interface MazInputPhoneNumberEmits {
+    'update:model-value': (value: string) => void
+    'update:country-code': (code: string) => void
     data: (results: any) => void
     'country-code': (code: string) => void
   }
 
-  const MazPhoneNumberInput: DefineComponent<MazPhoneNumberInputProps, {}, {}, {}, {}, {}, {}, MazPhoneNumberInputEmits>
-  export default MazPhoneNumberInput
+  const MazInputPhoneNumber: DefineComponent<MazInputPhoneNumberProps, {}, {}, {}, {}, {}, {}, MazInputPhoneNumberEmits>
+  export default MazInputPhoneNumber
 }
 
-declare module '@hugodev-oc/maz-ui-custom/css/main.css' {
+declare module 'maz-ui/styles' {
   const content: string
   export default content
-} 
+}

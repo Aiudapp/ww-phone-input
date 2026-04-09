@@ -1,6 +1,6 @@
 {
   "name": "phone-input-v2",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "scripts": {
     "build": "weweb build",
     "serve": "weweb serve"
@@ -8,7 +8,7 @@
   "dependencies": {
     "country-flag-icons": "^1.5.19",
     "libphonenumber-js": "^1.12.9",
-    "@hugodev-oc/maz-ui-custom": "3.50.6",
+    "maz-ui": "^4.9.0",
     "vue-country-flag-next": "^2.3.2"
   },
   "devDependencies": {

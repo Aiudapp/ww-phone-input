@@ -14,24 +14,23 @@
     <div v-else-if="content.readOnly" class="phone-readonly-empty"></div>
 
     <!-- Regular Phone Input -->
-    <MazPhoneNumberInput
+    <MazInputPhoneNumber
       v-else
       v-model="localPhoneData.phoneNumber"
       v-model:country-code="localPhoneData.countryCode"
       block
       :size="currentSize"
       :orientation="content?.orientation ?? 'responsive'"
-      :show-code-on-list="content?.showCodeOnList ?? true"
+      :show-code-in-list="content?.showCodeOnList ?? true"
       :preferred-countries="preferredCountriesArray"
       :country-locale="countryLocale"
-      :auto-format="content?.autoFormat ?? true"
-      :dark="content?.darkMode ?? false"
+      :auto-format="computedAutoFormat"
       :style="mazInputStyles"
       :disabled="isLoading"
       :error="showError"
       :success="showSuccess"
       :translations="currentTranslations"
-      @update="handleUpdate"
+      @update:model-value="handleModelValue"
       @data="handleData"
       @country-code="handleCountryCode"
       class="work-sans-phone-input"
@@ -42,7 +41,7 @@
       <template #country-list-flag="{ countryCode }">
         <span v-html="getCountryFlag(countryCode)" class="country-flag"></span>
       </template>
-    </MazPhoneNumberInput>
+    </MazInputPhoneNumber>
     <div v-if="showError" class="error-message">
       {{ currentErrorMessage }}
     </div>
@@ -52,14 +51,14 @@
 <script>
 import { computed, ref, onMounted, onErrorCaptured, watch } from 'vue'
 import { AsYouType, parsePhoneNumber } from 'libphonenumber-js'
-import MazPhoneNumberInput from '@hugodev-oc/maz-ui-custom/components/MazPhoneNumberInput.mjs'
-import '@hugodev-oc/maz-ui-custom/css/main.css'
+import MazInputPhoneNumber from 'maz-ui/dist/components/MazInputPhoneNumber.js'
+import 'maz-ui/styles'
 import * as countryFlagIcons from 'country-flag-icons/string/3x2'
 
 // Translations object moved outside component for better performance
 const translations = {
   en: {
-    countrySelector: {
+    countrySelect: {
       placeholder: 'Country code',
       error: 'Choose country',
       searchPlaceholder: 'Search a country',
@@ -70,7 +69,7 @@ const translations = {
     },
   },
   fr: {
-    countrySelector: {
+    countrySelect: {
       placeholder: 'Code pays',
       error: 'Choisissez un pays',
       searchPlaceholder: 'Rechercher un pays',
@@ -152,7 +151,7 @@ const defaultPhoneData = {
 export default {
   name: 'PhoneInput',
   components: {
-    MazPhoneNumberInput,
+    MazInputPhoneNumber,
   },
   props: {
     content: { type: Object, required: true },
@@ -372,6 +371,13 @@ Object containing phone input data:
       }
       
       return ['FR', 'GB', 'CA', 'US', 'DE']
+    },
+
+    computedAutoFormat() {
+      const val = this.content?.autoFormat
+      if (val === true || val === undefined) return 'blur'
+      if (val === false) return false
+      return val // already a string like 'blur', 'typing', 'disabled'
     },
 
     currentSize() {
