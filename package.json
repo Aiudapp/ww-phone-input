@@ -7,6 +7,11 @@
     "build": "weweb build",
     "serve": "weweb serve"
   },
+  "overrides": {
+    "@hugodev-oc/maz-ui-custom": {
+      "vue-router": "$vue-router"
+    }
+  },
   "dependencies": {
     "maz-ui": "^3.50.1",
     "libphonenumber-js": "^1.10.0"
