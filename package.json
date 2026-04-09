@@ -1,6 +1,6 @@
 {
   "name": "ww-phone-input",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Phone input component for WeWeb using Maz-UI",
   "private": true,
   "scripts": {
